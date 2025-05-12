@@ -28,7 +28,6 @@ public class ShowCommand implements Command {
         try{
             List<City> cities = CollectionManager.getInstance().getCollection().values().stream()
                     .peek(cwu -> cwu.city().setUserStatus(cwu.userID() == userInfo.id()))
-                    .peek(cwu -> cwu.city().setUserId(userInfo.id()))
                     .map(CityWithUser::city)
                     .collect(Collectors.toList());
             connector.sendInt(cities.size());

@@ -24,6 +24,9 @@ public class CommandManager {
         commands.put("insert", new InsertCommand());
         commands.put("remove", new RemoveCommand());
         commands.put("update", new UpdateCommand());
+        commands.put("clear", new ClearCommand());
+        commands.put("remove_all_by_government", new RemoveAllByGovernmentCommand());
+
     }
 
     public static CommandManager getInstance() {

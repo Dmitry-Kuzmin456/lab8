@@ -7,6 +7,7 @@ import org.client.network.Connector;
 import org.common.request.RequestGenerator;
 import org.common.request.UserData;
 
+import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,12 +15,13 @@ import java.util.List;
 public class RemoveCommand implements Command {
     public void execute(Connector connector, UserData userData, City city) {
         try{
-            System.out.println(CityTableModel.getSelectedCityIds());
             for (long id: CityTableModel.getSelectedCityIds()){
                 byte[] request = RequestGenerator.generateWithString("remove_key", String.valueOf(id), userData);
                 connector.sendInt(request.length);
                 connector.send(request);
-
+                String answer = new String(connector.receive());
+                if (!answer.equals("successfully")) {
+                    JOptionPane.showMessageDialog(null, answer);}
             }
 
 

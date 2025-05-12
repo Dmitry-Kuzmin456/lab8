@@ -1,6 +1,7 @@
 package org.client.commands;
 
 import model.City;
+import org.client.gui.CityTableModel;
 import org.client.interfaces.Command;
 import org.client.network.Connector;
 import org.common.request.RequestGenerator;
@@ -8,18 +9,19 @@ import org.common.request.UserData;
 
 import javax.swing.*;
 
-public class UpdateCommand implements Command {
-    @Override
+public class RemoveAllByGovernmentCommand implements Command {
     public void execute(Connector connector, UserData userData, City city) {
         try{
-            System.out.println("Update command");
-            byte[] request = RequestGenerator.generateWithCity("update", city, userData);
+
+            byte[] request = RequestGenerator.generateWithString("remove_all_by_government", city.getGovernment(), userData);
             connector.sendInt(request.length);
             connector.send(request);
             String answer = new String(connector.receive());
-            if (!answer.equals("successfully")) {JOptionPane.showMessageDialog(null, answer);}
-        } catch (Exception e){
-            System.out.println(e.getMessage());
+            if (!answer.equals("successfully")) {
+                JOptionPane.showMessageDialog(null, answer);}
+        }
+        catch (Exception e){
+            System.out.println("error in delete command: " + e.getMessage());
         }
 
 
@@ -27,6 +29,6 @@ public class UpdateCommand implements Command {
 
     @Override
     public String description() {
-        return "update element by id";
+        return "remove all selected cities";
     }
 }

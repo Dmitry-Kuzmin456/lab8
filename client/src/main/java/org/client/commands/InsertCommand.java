@@ -23,7 +23,7 @@ public class InsertCommand implements Command {
             connector.sendInt(request.length);
             connector.send(request);
             String answer = new String(connector.receive());
-            JOptionPane.showMessageDialog(null, answer);
+            if (!answer.equals("successfully")) {JOptionPane.showMessageDialog(null, answer);}
         } catch (Exception e){
             System.out.println(e.getMessage());
         }

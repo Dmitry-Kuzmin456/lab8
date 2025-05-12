@@ -45,25 +45,28 @@ public class CityCanvas extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
 
         for (City city : cities) {
+            boolean isCurrentUser = city.isUserStatus();
+            int size = isCurrentUser ? 26 : 20;
+
             int x = (int) Math.round(city.getCoordinates().getX());
             int y = (int) Math.round(city.getCoordinates().getY());
 
-            // Получаем цвет по userId
-            Color color = getColorForUser(city.getUserId());
+            int baseX = x;
+            int baseY = y;
+
+            Color color = isCurrentUser ? new Color(64, 224, 208) : getColorForUser(city.getUserId());
             g2.setColor(color);
 
-            // Рисуем город как круг
-            int size = 20;
-            g2.fillOval(x, y, size, size);
+            // Треугольная крыша
+            int[] xRoof = {baseX, baseX + size / 2, baseX + size};
+            int[] yRoof = {baseY + size / 2, baseY, baseY + size / 2};
+            g2.fillPolygon(xRoof, yRoof, 3);
 
-            // Обводка для своих городов
-            if (city.isUserStatus()) {
-                g2.setColor(Color.BLACK);
-                g2.setStroke(new BasicStroke(2));
-                g2.drawOval(x, y, size, size);
-            }
+            // Квадратный дом
+            g2.fillRect(baseX, baseY + size / 2, size, size / 2);
         }
     }
+
 
     // Получить город, на который кликнули
     private City getCityAt(Point point) {

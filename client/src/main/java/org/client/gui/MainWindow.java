@@ -41,11 +41,12 @@ public class MainWindow extends JFrame {
 
                 // Визуализация городов
                 CityCanvas cityCanvas = new CityCanvas(city -> {
-                        JOptionPane.showMessageDialog(this,
-                                "Город: " + city.getName() + "\nID пользователя: " + city.getUserId(),
-                                "Информация о городе",
-                                JOptionPane.INFORMATION_MESSAGE);
+                        City updatedCity = getCityUpdate(city);
+                        if (updatedCity != null) {
+                                CommandManager.getInstance().executeCommand("update", connector, userData, updatedCity);
+                        }
                 });
+
                 cityCanvas.setOpaque(false);
 
                 // Синхронизация
@@ -94,8 +95,12 @@ public class MainWindow extends JFrame {
                         filterPanel.add(filterField);
                 }
 
-                JButton toggleButton = createStyledButton("Переключить");
+                JButton toggleButton = createStyledButton("<html><center>Переключить режим<br> визуализации </center></html>");
                 toggleButton.addActionListener(e -> cardLayout.next(centerPanel));
+
+                toggleButton.setPreferredSize(new Dimension(200, 55));
+                toggleButton.setMaximumSize(new Dimension(200, 55));
+                toggleButton.setMinimumSize(new Dimension(200, 55));
 
                 topPanel.add(filterPanel, BorderLayout.CENTER);
                 topPanel.add(toggleButton, BorderLayout.EAST);
@@ -104,21 +109,54 @@ public class MainWindow extends JFrame {
                 JButton insertButton = createStyledButton("Вставить");
                 insertButton.addActionListener(e -> openInsertDialog());
 
+                insertButton.setPreferredSize(new Dimension(200, 55));
+                insertButton.setMaximumSize(new Dimension(200, 55));
+                insertButton.setMinimumSize(new Dimension(200, 55));
+
                 JButton removeButton = createStyledButton("Удалить");
                 removeButton.addActionListener(e -> CommandManager.getInstance().executeCommand("remove", connector, userData, null));
+
+                removeButton.setPreferredSize(new Dimension(200, 55));
+                removeButton.setMaximumSize(new Dimension(200, 55));
+                removeButton.setMinimumSize(new Dimension(200, 55));
 
                 JButton updateButton = createStyledButton("Обновить");
                 updateButton.addActionListener(e -> openUpdateDialog());
 
+                updateButton.setPreferredSize(new Dimension(200, 55));
+                updateButton.setMaximumSize(new Dimension(200, 55));
+                updateButton.setMinimumSize(new Dimension(200, 55));
+
+                JButton clearButton = createStyledButton("Очистить");
+                clearButton.addActionListener(e -> CommandManager.getInstance().executeCommand("clear", connector, userData, null));
+
+                clearButton.setPreferredSize(new Dimension(200, 55));
+                clearButton.setMaximumSize(new Dimension(200, 55));
+                clearButton.setMinimumSize(new Dimension(200, 55));
+
+//                JButton deleteByGovernmentButton = createStyledButton("Удалить по признаку гос режима");
+                JButton deleteByGovernmentButton = createStyledButton("<html><center>Удалить по<br>признаку гос режима</center></html>");
+
+                deleteByGovernmentButton.addActionListener(e -> openDeleteGvrnDialog());
+                deleteByGovernmentButton.setPreferredSize(new Dimension(200, 55));
+                deleteByGovernmentButton.setMaximumSize(new Dimension(200, 55));
+                deleteByGovernmentButton.setMinimumSize(new Dimension(200, 55));
                 JPanel buttonPanel = new JPanel();
                 buttonPanel.setOpaque(false);
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
                 buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+                buttonPanel.add(toggleButton);
+                buttonPanel.add(Box.createVerticalStrut(10));
                 buttonPanel.add(insertButton);
                 buttonPanel.add(Box.createVerticalStrut(10));
                 buttonPanel.add(removeButton);
                 buttonPanel.add(Box.createVerticalStrut(10));
                 buttonPanel.add(updateButton);
+                buttonPanel.add(Box.createVerticalStrut(10));
+                buttonPanel.add(clearButton);
+                buttonPanel.add(Box.createVerticalStrut(10));
+                buttonPanel.add(deleteByGovernmentButton);
+
 
                 // Общий фон
                 Image backgroundImage = new ImageIcon("img/main_background.jpg").getImage();
@@ -148,6 +186,58 @@ public class MainWindow extends JFrame {
                         CommandManager.getInstance().executeCommand("update", connector, userData, city);
                 }
         }
+        private void openDeleteGvrnDialog() {
+                // Создание модального окна
+                JDialog dialog = new JDialog((Frame) null, "Удалить по Government", true);
+                dialog.setSize(350, 150);
+                dialog.setLayout(new BorderLayout());
+                dialog.setLocationRelativeTo(null); // Центр экрана
+
+                // Выпадающий список значений из enum Government
+                JComboBox<Government> governmentBox = new JComboBox<>(Government.values());
+                governmentBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+                // Метка
+                JLabel label = new JLabel("Выберите тип Government:");
+                label.setForeground(Color.WHITE);
+                label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+                // Кнопка подтверждения
+                JButton confirmButton = new JButton("Удалить");
+                confirmButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+                confirmButton.addActionListener(e -> {
+                        Government selected = (Government) governmentBox.getSelectedItem();
+                        if (selected != null) {
+                                City city = new City.CityBuilder().setGovernment(selected).build();
+                                CommandManager.getInstance().executeCommand("remove_all_by_government", connector, userData, city);
+                                dialog.dispose(); // Закрыть окно
+                        }
+                });
+
+                // Панель с комбобоксом и подписью
+                JPanel inputPanel = new JPanel(new GridLayout(2, 1));
+                inputPanel.setBackground(new Color(40, 40, 40));
+                inputPanel.add(label);
+                inputPanel.add(governmentBox);
+
+                // Панель с кнопкой
+                JPanel buttonPanel = new JPanel();
+                buttonPanel.setBackground(new Color(40, 40, 40));
+                confirmButton.setBackground(new Color(90, 90, 90));
+                confirmButton.setForeground(Color.WHITE);
+                buttonPanel.add(confirmButton);
+
+                // Добавляем всё в диалог
+                dialog.add(inputPanel, BorderLayout.CENTER);
+                dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+                dialog.setVisible(true);
+        }
+
+
+
+
 
 
         private void showError(String message, JTextField fieldToClear) {
@@ -417,6 +507,221 @@ public class MainWindow extends JFrame {
                                         .setGovernor(governor)
                                         .build();
                                 resultCity.set(newCity);
+                                dialog.dispose();
+
+                        } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(dialog, "Ошибка при создании города:\n" + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                        }
+                });
+
+                dialog.add(new JLabel());
+                dialog.add(submitButton);
+                dialog.setLocationRelativeTo(this);
+                dialog.setVisible(true);
+
+                return resultCity.get();
+        }
+
+
+        private City getCityUpdate(City city) {
+                JDialog dialog = new JDialog(this, "Изменение города", true);
+                dialog.setSize(400, 400);
+                dialog.setLayout(new GridLayout(13, 2));
+                dialog.getContentPane().setBackground(new Color(40, 40, 40, 220));
+
+                // Только отображаем ID
+                JLabel idLabel = new JLabel("ID: " + city.getId());
+                idLabel.setForeground(Color.WHITE);
+                idLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                dialog.add(idLabel);
+                dialog.add(new JLabel()); // пустая ячейка
+
+                // Остальные поля
+                JTextField nameField = new JTextField(city.getName());
+                JTextField xField = new JTextField(String.valueOf(city.getCoordinates().getX()));
+                JTextField yField = new JTextField(String.valueOf(city.getCoordinates().getY()));
+                JTextField areaField = new JTextField(String.valueOf(city.getArea()));
+                JTextField populationField = new JTextField(String.valueOf(city.getPopulation()));
+                JTextField metersField = new JTextField(String.valueOf(city.getMetersAboveSeaLevel()));
+                JComboBox<Climate> climateBox = new JComboBox<>(Climate.values());
+                climateBox.setSelectedItem(city.getClimate());
+                JComboBox<Government> governmentBox = new JComboBox<>(Government.values());
+                governmentBox.setSelectedItem(city.getGovernment());
+                JComboBox<StandardOfLiving> standardBox = new JComboBox<>(StandardOfLiving.values());
+                standardBox.setSelectedItem(city.getStandardOfLiving());
+                JTextField humanField = new JTextField(String.valueOf(city.getGovernor().getAge()));
+
+                // Добавляем метки и поля
+                dialog.add(new JLabel("Name*"));
+                dialog.add(nameField);
+                dialog.add(new JLabel("X coordinate*"));
+                dialog.add(xField);
+                dialog.add(new JLabel("Y coordinate*"));
+                dialog.add(yField);
+                dialog.add(new JLabel("Area*"));
+                dialog.add(areaField);
+                dialog.add(new JLabel("Population*"));
+                dialog.add(populationField);
+                dialog.add(new JLabel("Meters Above Sea Level"));
+                dialog.add(metersField);
+                dialog.add(new JLabel("Climate*"));
+                dialog.add(climateBox);
+                dialog.add(new JLabel("Government"));
+                dialog.add(governmentBox);
+                dialog.add(new JLabel("Standard Of Living*"));
+                dialog.add(standardBox);
+                dialog.add(new JLabel("Governor Age"));
+                dialog.add(humanField);
+
+                JButton submitButton = new JButton("Сохранить");
+
+                // Стили
+                Color backgroundColor = new Color(60, 60, 60, 200);
+                Color textColor = Color.WHITE;
+                Font fieldFont = new Font("Segoe UI", Font.PLAIN, 14);
+
+                JTextField[] fields = {
+                        nameField, xField, yField,
+                        areaField, populationField, metersField, humanField
+                };
+
+                for (JTextField field : fields) {
+                        field.setBackground(backgroundColor);
+                        field.setForeground(textColor);
+                        field.setCaretColor(textColor);
+                        field.setFont(fieldFont);
+                        field.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100)));
+                }
+
+                JComboBox<?>[] boxes = {climateBox, governmentBox, standardBox};
+                for (JComboBox<?> box : boxes) {
+                        box.setBackground(backgroundColor);
+                        box.setForeground(textColor);
+                        box.setFont(fieldFont);
+                        ((JLabel) box.getRenderer()).setHorizontalAlignment(SwingConstants.LEFT);
+                }
+
+                Component[] components = dialog.getContentPane().getComponents();
+                for (Component comp : components) {
+                        if (comp instanceof JLabel label) {
+                                label.setForeground(new Color(200, 200, 200));
+                                label.setFont(fieldFont);
+                        }
+                }
+
+                submitButton.setBackground(new Color(90, 90, 90));
+                submitButton.setForeground(Color.WHITE);
+                submitButton.setFocusPainted(false);
+                submitButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                submitButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+
+                AtomicReference<City> resultCity = new AtomicReference<>(null);
+
+                submitButton.addActionListener(e -> {
+                        try {
+                                String name = nameField.getText().trim();
+                                if (name.isEmpty()) {
+                                        showError("Name не может быть пустым.", nameField);
+                                        return;
+                                }
+
+                                double x;
+                                try {
+                                        x = Double.parseDouble(xField.getText().trim());
+                                } catch (NumberFormatException ex) {
+                                        showError("X должно быть числом (double).", xField);
+                                        return;
+                                }
+
+                                float y;
+                                try {
+                                        y = Float.parseFloat(yField.getText().trim());
+                                } catch (NumberFormatException ex) {
+                                        showError("Y должно быть числом (float).", yField);
+                                        return;
+                                }
+
+                                long area;
+                                try {
+                                        area = Long.parseLong(areaField.getText().trim());
+                                        if (area <= 0) {
+                                                showError("Area должно быть больше 0.", areaField);
+                                                return;
+                                        }
+                                } catch (NumberFormatException ex) {
+                                        showError("Area должно быть числом (long).", areaField);
+                                        return;
+                                }
+
+                                int population;
+                                try {
+                                        population = Integer.parseInt(populationField.getText().trim());
+                                        if (population <= 0) {
+                                                showError("Population должно быть больше 0.", populationField);
+                                                return;
+                                        }
+                                } catch (NumberFormatException ex) {
+                                        showError("Population должно быть числом (int).", populationField);
+                                        return;
+                                }
+
+                                float meters = 0;
+                                String metersText = metersField.getText().trim();
+                                if (!metersText.isEmpty()) {
+                                        try {
+                                                meters = Float.parseFloat(metersText);
+                                        } catch (NumberFormatException ex) {
+                                                showError("Meters должно быть числом (float).", metersField);
+                                                return;
+                                        }
+                                }
+
+                                Climate climate = (Climate) climateBox.getSelectedItem();
+                                if (climate == null) {
+                                        showError("Выберите Climate.", null);
+                                        return;
+                                }
+
+                                Government government = (Government) governmentBox.getSelectedItem();
+                                StandardOfLiving standard = (StandardOfLiving) standardBox.getSelectedItem();
+                                if (standard == null) {
+                                        showError("Выберите Standard of Living.", null);
+                                        return;
+                                }
+
+                                Human governor;
+                                String ageText = humanField.getText().trim();
+                                if (ageText.isEmpty()) {
+                                        showError("Возраст губернатора обязателен.", humanField);
+                                        return;
+                                } else {
+                                        try {
+                                                long age = Long.parseLong(ageText);
+                                                if (age <= 0) {
+                                                        showError("Возраст губернатора должен быть > 0.", humanField);
+                                                        return;
+                                                }
+                                                governor = new Human(age);
+                                        } catch (NumberFormatException ex) {
+                                                showError("Возраст должен быть числом (long).", humanField);
+                                                return;
+                                        }
+                                }
+
+                                City updatedCity = new City.CityBuilder()
+                                        .setId(city.getId())
+                                        .setName(name)
+                                        .setCoordinates(new Coordinates(x, y))
+                                        .setArea(area)
+                                        .setPopulation(population)
+                                        .setMetersAboveSeaLevel(meters)
+                                        .setClimate(climate)
+                                        .setGovernment(government)
+                                        .setStandardOfLiving(standard)
+                                        .setGovernor(governor)
+                                        .build();
+
+                                resultCity.set(updatedCity);
                                 dialog.dispose();
 
                         } catch (Exception ex) {

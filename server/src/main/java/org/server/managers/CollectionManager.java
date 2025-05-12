@@ -165,7 +165,7 @@ public class CollectionManager {
                 builder.setClimate(Climate.fromDescription(rs.getString("climate").toLowerCase()));
                 builder.setGovernment(Government.fromDescription(rs.getString("government").toLowerCase()));
                 builder.setStandardOfLiving(StandardOfLiving.fromDescription(rs.getString("standardofliving")));
-
+                builder.setUserId(rs.getInt("user_id"));
 
                 try (PreparedStatement pst = conn.prepareStatement(selectHuman)){
                     pst.setLong(1, rs.getLong("id"));
